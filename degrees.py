@@ -91,9 +91,29 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
+    explored_actors_id = set()
+    qf = QueueFrontier()
+    starting_node = Node(state=source, parent=None, action=None)
+    qf.add(starting_node)
+    while True:
+        if qf.empty():
+            return None
+        new_node = qf.remove()
+        explored_actors_id.add(new_node.state)
+        for movie_id, actor_id in neighbors_for_person(new_node.state):
+            if not qf.contains_state(actor_id) and actor_id not in explored_actors_id:
+                new_child_node = Node(state=actor_id, parent=new_node, action=movie_id)
+                qf.add(new_child_node)
 
-    # TODO
-    raise NotImplementedError
+                if new_child_node.state == target:
+                    result = []
+                    while new_child_node.parent is not None:
+                        result.append((new_child_node.action, new_child_node.state))
+                        new_child_node = new_child_node.parent
+                    result.reverse()
+                    return result
+
+    return None
 
 
 def person_id_for_name(name):
