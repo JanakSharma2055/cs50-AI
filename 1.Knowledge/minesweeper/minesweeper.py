@@ -57,6 +57,7 @@ class Minesweeper():
         Returns the number of mines that are
         within one row and column of a given cell,
         not including the cell itself.
+        i.e it returns the number of mines surrounding the given cell
         """
 
         # Keep count of nearby mines
@@ -105,13 +106,15 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        raise NotImplementedError
+        if len(self.cells) ==self.count:
+            return self.cells
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        raise NotImplementedError
+        if len(self.cells) == 0:
+            return self.cells
 
     def mark_mine(self, cell):
         """
