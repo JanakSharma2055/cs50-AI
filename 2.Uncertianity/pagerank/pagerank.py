@@ -57,7 +57,24 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
+    prob_distribution =dict()
+    SIZE =len(corpus)
+
+    if corpus[page]:
+        #if page has links 
+        for item in corpus[page]:
+            prob_distribution[item] = damping_factor/SIZE
+
+        for item in corpus:
+            prob_distribution[item] = prob_distribution.get(item,0) + (1-damping_factor)/SIZE
+    
+    else:
+        #if page has no links
+        for item in corpus:
+            prob_distribution[item] = 1/SIZE
+
+    return prob_distribution        
+    
 
 
 def sample_pagerank(corpus, damping_factor, n):
@@ -69,7 +86,27 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    rank_list = {page: 0 for page in corpus}
+
+    
+    key_list =list(corpus)
+    random_choosen_item = random.choice(key_list)
+
+    
+    for i in range(n):
+        
+        rank_list[random_choosen_item] += 1/n
+
+       
+        t = transition_model(corpus, random_choosen_item, damping_factor)
+
+        #returns a list with single item
+        random_choosen_item = random.choices(list(t.keys()), weights=list(t.values()), k=1)[0]
+
+    return rank_list
+    
+
+    
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -81,7 +118,36 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    rank_list = dict()
+
+    # assigning each page a rank of 1 / N
+    for name in corpus:
+        rank_list[name] = 1 / len(corpus)
+
+    while True:
+        calculated_ranks = dict()
+        for name in corpus:
+            for page, link in corpus.items():
+                #if not link then it is assumed to have a link to all pages
+                if not link:
+                    link = set(corpus)
+
+                
+                if name in link:
+                    calculated_ranks[name] = calculated_ranks.get(name, 0) + rank_list[page]/len(link)
+
+        previous_rank = rank_list.copy()
+        for name in corpus:
+            rank_list[name] = (1 - damping_factor)/len(corpus) + damping_factor * calculated_ranks.get(name, 0)
+
+        
+        threshold = {name: abs(previous_rank[name] - rank_list[name]) for name in rank_list}
+
+        
+        if all(round(value,3) <= 0.001 for value in threshold.values()):
+            break
+
+    return rank_list
 
 
 if __name__ == "__main__":
