@@ -101,7 +101,11 @@ class NimAI():
         Return the Q-value for the state `state` and the action `action`.
         If no Q-value exists yet in `self.q`, return 0.
         """
-        raise NotImplementedError
+        for item in self.q:
+            if item==(tuple(state),action):
+                return self.q[tuple(state),action]
+        return 0
+        
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
         """
@@ -118,7 +122,7 @@ class NimAI():
         `alpha` is the learning rate, and `new value estimate`
         is the sum of the current reward and estimated future rewards.
         """
-        raise NotImplementedError
+        self.q[(tuple(state), action)] =  old_q + self.alpha * ((reward + future_rewards) - old_q)
 
     def best_future_reward(self, state):
         """
@@ -130,7 +134,19 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
+        actions = Nim.available_actions(state)
+
+        # If no any action are available return 0
+        if not actions:
+            return 0
+
+        # list of all the Q-values for `(state, action)` pair
+        avail_q_values = list()
+        for action in actions:
+            avail_q_values.append(self.q.get((tuple(state), action), 0))
+
+        # return maximum of all of their available q values
+        return max(avail_q_values)
 
     def choose_action(self, state, epsilon=True):
         """
@@ -147,9 +163,32 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        # set of all possible actions that are available for a given state
+        avail_actions = Nim.available_actions(state)
+        
+        #a dictionary of collection of q values of all possible actions for 
+        #given state
+        qvalues_list = dict()
+        for action in avail_actions:
+            qvalues_list[action] = self.q.get((tuple(state), action), 0)
 
+        # best action on the basis of q value 
+        best_action = max(qvalues_list, key=qvalues_list.get)
 
+        # greedy decision-making algorithm
+        if not epsilon:
+            return best_action
+        
+        # epsilon-greedy algorithm choosing a random available action with 
+        # probability 
+        else:
+            #choosing the random qvalue for a value less than epsilon #probability
+            if random.random() <= self.epsilon:
+                return random.choice(list(qvalues_list))
+            else:
+                return best_action
+        
+        
 def train(n):
     """
     Train an AI by playing `n` games against itself.
@@ -185,6 +224,9 @@ def train(n):
 
             # When game is over, update Q values with rewards
             if game.winner is not None:
+                #what is this update for confused here??
+                #may be AI is playing against itself so twice update is requird
+                
                 player.update(state, action, new_state, -1)
                 player.update(
                     last[game.player]["state"],
