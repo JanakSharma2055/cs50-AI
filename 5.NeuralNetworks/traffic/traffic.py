@@ -16,11 +16,12 @@ TEST_SIZE = 0.4
 def main():
 
     # Check command-line arguments
-    if len(sys.argv) not in [2, 3]:
-        sys.exit("Usage: python traffic.py data_directory [model.h5]")
+    # if len(sys.argv) not in [2, 3]:
+    #     sys.exit("Usage: python traffic.py data_directory [model.h5]")
 
     # Get image arrays and labels for all image files
-    images, labels = load_data(sys.argv[1])
+    # images, labels = load_data("gtsrb-small
+    images,labels =load_data(sys.argv[1])
 
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
@@ -58,7 +59,24 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    images = []
+    labels = []
+    # Python method walk() generates the file names in a directory tree by    #walking the tree
+    for root, dir, files in os.walk(data_dir):
+        for file_name in files:
+            if file_name.startswith("."):
+                continue
+            #reads each image as an array of rgb
+            image = cv2.imread(os.path.join(root, file_name))
+            #resizes image and returns an array
+            image = cv2.resize(image, (IMG_HEIGHT, IMG_WIDTH))
+            images.append(image)
+            labels.append(int(os.path.basename(root)))
+
+    if len(labels)==len(images):
+        print(f"successfully loaded {len(labels)} labels and images")
+    return (images, labels)
+
 
 
 def get_model():
@@ -67,7 +85,51 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    # Create a convolutional neural network
+    model = tf.keras.models.Sequential([
+
+        # Convolutional layer. Learn 16 filters using a 3x3 kernel
+        tf.keras.layers.Conv2D(
+            16, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+
+        # Max-pooling layer, using 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+        # Convolutional layer. Learn 32 filters using a 3x3 kernel
+        tf.keras.layers.Conv2D(
+            20, (3, 3), activation="relu"
+        ),
+
+        # Max-pooling layer, using 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+        # Convolutional layer. Learn 64 filters using a 3x3 kernel
+        tf.keras.layers.Conv2D(
+            10, (3, 3), activation="relu"
+        ),
+
+        # Max-pooling layer, using 2x2 pool size
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+
+        # Flatten units
+        tf.keras.layers.Flatten(),
+
+        # Add a hidden layer with dropout
+        tf.keras.layers.Dense(50, activation="relu"),
+        tf.keras.layers.Dropout(0.5),
+
+        # Add an output layer with output units for NUM_CATEGORIES
+        tf.keras.layers.Dense(3, activation="softmax")
+    ])
+
+    # Train neural network
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    return model
 
 
 if __name__ == "__main__":
