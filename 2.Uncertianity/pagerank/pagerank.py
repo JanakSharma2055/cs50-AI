@@ -57,7 +57,7 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    prob_distribution =dict()
+    prob_distribution ={}
     SIZE =len(corpus)
 
     if corpus[page]:
@@ -69,7 +69,7 @@ def transition_model(corpus, page, damping_factor):
             prob_distribution[item] = prob_distribution.get(item,0) + (1-damping_factor)/SIZE
     
     else:
-        #if page has no links
+        #random selection of those pages that donot have any link
         for item in corpus:
             prob_distribution[item] = 1/SIZE
 
@@ -100,7 +100,8 @@ def sample_pagerank(corpus, damping_factor, n):
        
         t = transition_model(corpus, random_choosen_item, damping_factor)
 
-        #returns a list with single item
+        #returns a list with single item and the first item is extracted from
+        #the list of items
         random_choosen_item = random.choices(list(t.keys()), weights=list(t.values()), k=1)[0]
 
     return rank_list
@@ -118,32 +119,32 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    rank_list = dict()
+    rank_list = {}
 
-    # assigning each page a rank of 1 / N
     for name in corpus:
         rank_list[name] = 1 / len(corpus)
 
     while True:
-        calculated_ranks = dict()
+        calculated_ranks = {}
         for name in corpus:
             for page, link in corpus.items():
                 #if not link then it is assumed to have a link to all pages
+                if name in link:
+                    calculated_ranks[name] = calculated_ranks.get(name, 0) + rank_list[page]/len(link)
+
                 if not link:
                     link = set(corpus)
 
                 
-                if name in link:
-                    calculated_ranks[name] = calculated_ranks.get(name, 0) + rank_list[page]/len(link)
-
+        #making deep copy of list items
         previous_rank = rank_list.copy()
         for name in corpus:
             rank_list[name] = (1 - damping_factor)/len(corpus) + damping_factor * calculated_ranks.get(name, 0)
 
         
         threshold = {name: abs(previous_rank[name] - rank_list[name]) for name in rank_list}
-
-        
+      
+      #this is to check for accuracy 
         if all(round(value,3) <= 0.001 for value in threshold.values()):
             break
 
