@@ -141,7 +141,8 @@ def iterate_pagerank(corpus, damping_factor):
         for name in corpus:
             rank_list[name] = (1 - damping_factor)/len(corpus) + damping_factor * calculated_ranks.get(name, 0)
 
-        
+        #calculation of difference of the rank value from previous one as
+        #to check for accuracy
         threshold = {name: abs(previous_rank[name] - rank_list[name]) for name in rank_list}
       
       #this is to check for accuracy 

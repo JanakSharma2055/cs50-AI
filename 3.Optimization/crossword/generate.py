@@ -2,6 +2,7 @@ import sys
 import itertools
 
 from crossword import *
+from copy import deepcopy
 
 # TODO two last functions are pending rest is done will implement at the end
 
@@ -265,7 +266,28 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+        # assignment contains the dictionary for the variables that have 
+        #their values assigned
+        #this will contain the remaining dict which have values unassigned
+        unassigned_variables = self.crossword.variables - set(assignment)
+        #print(type(unassigned_variables))
+
+        # tracks number of values in domains of each unassigned variable
+        domains = {var: len(self.domains[var]) for var in unassigned_variables}
+
+        # variable(s) with the minimum number of remaining values in its domain
+        res = [var for var in domains if domains[var] == min(domains.values())]
+
+        # returns variable with smallest domain
+        if len(res) == 1:
+            return res[0]
+
+        #in case of tie
+        # tracking variable in terms of degree
+        degree_of_variables = {var: len(self.crossword.neighbors(var)) for var in res}
+
+        # returns variable with maximum neighbours
+        return max(degree_of_variables, key=degree_of_variables.get)
 
     def backtrack(self, assignment):
         """
@@ -276,7 +298,43 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
+        # returns the complete assignment if possible to do so.
+        if self.assignment_complete(assignment):
+            return assignment
+
+        # unassigned variable based on the MRV and the degree heuristics
+        var = self.select_unassigned_variable(assignment)
+
+        # order values based on Least-constraining-value heuristic
+        for value in self.order_domain_values(var, assignment):
+
+            # copy self.domains for restoring it, if needed
+            domain_copy = deepcopy(self.domains)
+
+            
+
+           
+
+            # check if new assignment is consistent or not
+            if self.consistent(assignment):
+                # make a new assignment to a variable
+                assignment[var] = value
+
+                # if consistent, backtrack for another assignment
+                result = self.backtrack(assignment)
+
+                if result is not None:
+                    return result
+
+            # if inconsistent, delete assignment and its inferences
+            # and also restore self.domains to its previous values
+            del assignment[var]
+            
+            self.domains = domain_copy
+
+        # returns None, if no solution is possible
+        return None
+
 
 
 def main():
