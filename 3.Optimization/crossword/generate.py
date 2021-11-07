@@ -208,8 +208,7 @@ class CrosswordCreator():
         #the description is a bit misleading
         #the assignment consists of each variable assigned with one single word
         #which needs to be checked if it is consistent 
-        #pending to see--------------------
-         # checks for constraint that all words must be different
+        # checks for constraint that all words must be different
         if len(assignment.values()) != len(set(assignment.values())):
             return False
 
@@ -298,28 +297,30 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        # returns the complete assignment if possible to do so.
         if self.assignment_complete(assignment):
             return assignment
 
-        # unassigned variable based on the MRV and the degree heuristics
-        var = self.select_unassigned_variable(assignment)
+        
+        unassigned_var = self.select_unassigned_variable(assignment)
 
         # order values based on Least-constraining-value heuristic
-        for value in self.order_domain_values(var, assignment):
+        for value in self.order_domain_values(unassigned_var, assignment):
 
             # copy self.domains for restoring it, if needed
             domain_copy = deepcopy(self.domains)
+            #this is important to assign outside
+            #in lecture algo it is given inside
+            assignment[unassigned_var] = value
+
 
             
 
            
 
-            # check if new assignment is consistent or not
+            
             if self.consistent(assignment):
                 # make a new assignment to a variable
-                assignment[var] = value
-
+                
                 # if consistent, backtrack for another assignment
                 result = self.backtrack(assignment)
 
@@ -328,7 +329,7 @@ class CrosswordCreator():
 
             # if inconsistent, delete assignment and its inferences
             # and also restore self.domains to its previous values
-            del assignment[var]
+            del assignment[unassigned_var]
             
             self.domains = domain_copy
 
