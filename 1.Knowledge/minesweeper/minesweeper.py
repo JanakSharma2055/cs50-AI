@@ -205,7 +205,7 @@ class MinesweeperAI():
         if sentence not in self.knowledge:
             self.knowledge.append(sentence)
 
-        # marks the identified mines or safe cells
+        # this marks the identified safe cells and identified mines
         for sentence in self.knowledge:
             safe = sentence.known_safes()
             mine = sentence.known_mines()
@@ -224,18 +224,20 @@ class MinesweeperAI():
             # removes non-empty duplicates 
             if s1 == s2 and s2.cells:
                 self.knowledge.remove(s2)
+            
+            elif s2.cells.issubset(s1.cells):
+                new_sentence = Sentence(s1.cells - s2.cells, s1.count - s2.count)
+                if new_sentence not in self.knowledge:
+                    print("Inference: ", new_sentence)
+                    self.knowledge.append(new_sentence)
 
             elif s1.cells.issubset(s2.cells):
-                s = Sentence(s2.cells - s1.cells, s2.count - s1.count)
-                if s not in self.knowledge:
-                    print("Inference: ", s)
-                    self.knowledge.append(s)
+                new_sentence = Sentence(s2.cells - s1.cells, s2.count - s1.count)
+                if new_sentence not in self.knowledge:
+                    print("Inference: ", new_sentence)
+                    self.knowledge.append(new_sentence)
 
-            elif s2.cells.issubset(s1.cells):
-                s = Sentence(s1.cells - s2.cells, s1.count - s2.count)
-                if s not in self.knowledge:
-                    print("Inference: ", s)
-                    self.knowledge.append(s)
+            
 
         # removing empty sentences 
         for sentence in list(self.knowledge):
