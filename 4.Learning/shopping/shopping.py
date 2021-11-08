@@ -7,6 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 TEST_SIZE = 0.4
 
 
+
 def main():
 
     # Check command-line arguments
@@ -86,7 +87,9 @@ def load_data(filename):
 
     
     csvreader = csv.DictReader(file)
-    header = next(csvreader)
+    #earlier the project may have been rejected due to below line
+    #I was escaping first row of data 
+    # header = next(csvreader)
 
 
     for row in csvreader:
@@ -109,8 +112,13 @@ def load_data(filename):
             1 if row['VisitorType'] == 'Returning_Visitor' else 0,
             1 if row['Weekend'] == 'TRUE' else 0
         ])
+        # print("-----------------------")
+        # print(f"{row['Month']}= {months[row['Month']]}")
         
         labels.append(1 if row['Revenue'] == 'TRUE' else 0)
+        # print(evidence)
+        # print("-------------------------------------------")
+    print(evidence[0])
     
     return (evidence,labels)
 
