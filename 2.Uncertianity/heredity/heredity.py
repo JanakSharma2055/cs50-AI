@@ -170,18 +170,16 @@ def joint_probability(people, one_gene, two_genes, have_trait):
 
             parental_prob = {father: 0, mother:0}
             for parent in parental_prob:
-            # If a parent has no copies, then the gene will not pass on to the child.
-            # However, there is a chance of mutation into being the target gene.
+            
                 if parent not in one_gene and parent not in two_genes:
                     parental_prob[parent] = PROBS["mutation"]
 
-                # If a parent has one copy, then the gene passes on with probability 0.5.
-                # After mutation, (1-PROBS["mutation"])*0.5 + PROBS["mutation"]*0.5 = 0.5
+                
                 elif parent in one_gene:
                     parental_prob[parent] = 0.5
 
                 # If a parent has two copies, then the gene passes on to the child.
-                # However, there is a chance of mutation into not being the target gene.
+                # However, there is a chance of mutation
                 elif parent in two_genes:
                     parental_prob[parent] = 1 - PROBS["mutation"]
 
@@ -190,22 +188,18 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             if gene_copy == 0:
                 p = (1 - parental_prob[mother]) * (1 - parental_prob[father])
 
-            # It is only possible for a person to have one copy of the gene if
-            # either he gets the gene from his mother and not his father,
-            # or he gets the gene from his father and not his mother.
+            
             elif gene_copy == 1:
                 p = parental_prob[mother]*(1 - parental_prob[father]) +    parental_prob[father]*(1 - parental_prob[mother])
 
-            # It is only possible for a person to have two copies of the gene
-            # if he gets the target gene from both of his mother and father each
+            
             elif gene_copy == 2:
                 p = parental_prob[mother] * parental_prob[father]
 
-        # multiplies gene probability with trait probability.
-        # trait probability obtained from probability distribution PROBS["trait"]
+        
         p *= PROBS["trait"][gene_copy][person in have_trait]
 
-        # multiplies the probability of each person in data set to get joint probability
+        
         joint_prob *= p
 
     return joint_prob
