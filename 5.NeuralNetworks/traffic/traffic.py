@@ -88,39 +88,41 @@ def get_model():
     # Create a convolutional neural network
     model = tf.keras.models.Sequential([
 
-        # Convolutional layer. Learn 16 filters using a 3x3 kernel
+        # Convolutional layer. Learn 28 filters using a 3x3 kernel
         tf.keras.layers.Conv2D(
-            16, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            28, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ),
 
         # Max-pooling layer, using 2x2 pool size
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
-        # Convolutional layer. Learn 32 filters using a 3x3 kernel
+        # Convolutional layer. Learn 28 filters using a 3x3 kernel
         tf.keras.layers.Conv2D(
-            20, (3, 3), activation="relu"
+            28, (3, 3), activation="relu"
         ),
 
         # Max-pooling layer, using 2x2 pool size
         tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
         # Convolutional layer. Learn 64 filters using a 3x3 kernel
-        tf.keras.layers.Conv2D(
-            10, (3, 3), activation="relu"
-        ),
+        # tf.keras.layers.Conv2D(
+        #     10, (3, 3), activation="relu"
+        # ),
 
-        # Max-pooling layer, using 2x2 pool size
-        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        # # Max-pooling layer, using 2x2 pool size
+        # tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
 
         # Flatten units
         tf.keras.layers.Flatten(),
 
         # Add a hidden layer with dropout
-        tf.keras.layers.Dense(50, activation="relu"),
-        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(600, activation="relu"),
+        tf.keras.layers.Dropout(0.4),
 
+        
+    
         # Add an output layer with output units for NUM_CATEGORIES
-        tf.keras.layers.Dense(3, activation="softmax")
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
     ])
 
     # Train neural network
@@ -129,6 +131,7 @@ def get_model():
         loss="categorical_crossentropy",
         metrics=["accuracy"]
     )
+    model.summary()
     return model
 
 
